@@ -10,6 +10,8 @@ from linebot.models import *
 
 import getSentance, sys, twstock, re, datetime, time
 
+import scrapy_stock as sp 
+
 app = Flask(__name__)
 
 # Channel Access Token
@@ -35,36 +37,36 @@ def callback():
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print(event.message.text)
+    print("Recieve from client: " + event.message.text)
 
     # compile identifier
-    ti = time.time()
+    # ti = time.time()
     pattern = re.compile("[0-9]{4}")
-    t1 = time.time()
+    # t1 = time.time()
 
     if "心情不好" in event.message.text:
         reply = "心情不好啊? 跟你說: \n \n"
         reply += getSentance.pick_a_sentence()
-    elif pattern.match(event.message.text):
+    elif pattern.fullmatch(event.message.text):
         code = event.message.text
-        # reply = getSotckInfo(code)
-        info = getSotckInfo(code)
+        # info = getSotckInfo(code)
+        info = sp.get_stockValue_from_twseAPI(code)
         reply = info[0]
-        (t2,t3,t4,t5,t6) = info[1]
-        
     else:
         return
+
     message = TextSendMessage(text=reply)
     line_bot_api.reply_message(event.reply_token, message)
 
-    debugMsg = "Time consumption:\n"
-    debugMsg += f"re compile:\t {round(t1-ti, 3)}\n"
-    debugMsg += f"realtime get:\t {round(t3-t2, 3)}\n"
-    debugMsg += f"Stock get:\t {round(t4-t3, 3)}\n"
-    debugMsg += f"price get:\t {round(t6-t5, 3)}\n"
-    debugMsg += f"Total :\t {round(t6-ti, 3)}\n"
-    print(debugMsg)
-    sys.stdout.flush()
+    # (t2,t3,t4,t5,t6) = info[1] 
+    # debugMsg = "Time consumption:\n"
+    # debugMsg += f"re compile:\t {round(t1-ti, 3)}\n"
+    # debugMsg += f"realtime get:\t {round(t3-t2, 3)}\n"
+    # debugMsg += f"Stock get:\t {round(t4-t3, 3)}\n"
+    # debugMsg += f"price get:\t {round(t6-t5, 3)}\n"
+    # debugMsg += f"Total :\t {round(t6-ti, 3)}\n"
+    # print(debugMsg)
+    # sys.stdout.flush()
 
 def getSotckInfo(keyword):
     try:
@@ -99,6 +101,7 @@ def getSotckInfo(keyword):
     upDown = "(-)" if float(diff) == 0.0 else upDown
     reply = f"{keyword} {rtStock['info']['name']}  {rtPrice}\n漲跌幅 {upDown}{diff} ({percentage}%)"
     return reply, (t2,t3,t4,t5,t6)
+
 
 import os
 if __name__ == "__main__":

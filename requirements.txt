@@ -2,3 +2,6 @@ line-bot-sdk
 flask
 twstock
 lxml
+bs4
+requests
+pandas
