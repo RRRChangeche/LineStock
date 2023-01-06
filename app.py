@@ -101,7 +101,6 @@ def getSotckInfo(keyword):
     return reply, (t2,t3,t4,t5,t6)
 
 
-import os
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
