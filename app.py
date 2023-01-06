@@ -8,13 +8,14 @@ from linebot.exceptions import (
 from linebot.models import *
 import getSentance, sys, twstock, re, datetime, time
 import scrapy_stock as sp 
+import os
 
 app = Flask(__name__)
 
 # Channel Access Token
-line_bot_api = LineBotApi('S3qOJcsWGYNedORcrvQUyD85JoOLuH1AnVAV2M/53YLYjx552QmLfp6bvcb5Y2S6KeOhRgWR1A8dC22zRo777ZjhBQutfnGDk5uXnZeAy9fUf0c71xIg2/bY/dQoa2QhCziSoNu/G1E4dQffOCbMWQdB04t89/1O/w1cDnyilFU=')
+line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 # Channel Secret
-handler = WebhookHandler('04cba13430c76f36f2e41687ff3a4f00')
+handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
@@ -46,7 +47,7 @@ def handle_message(event):
         reply += getSentance.pick_a_sentence()
     elif pattern.fullmatch(event.message.text):
         code = event.message.text
-        # info = sp.getSotckInfo(code)
+        # info = getSotckInfo(code)
         info = sp.get_stockValue_from_twseAPI(code)
         reply = info[0]
     else:
@@ -65,6 +66,39 @@ def handle_message(event):
     # print(debugMsg)
     # sys.stdout.flush()
 
+def getSotckInfo(keyword):
+    try:
+        t2 = time.time()
+        rtStock = twstock.realtime.get(keyword)
+        t3 = time.time()
+        preStock = twstock.Stock(keyword)
+        t4 = time.time()
+        if not rtStock['success']:
+            return '代號輸入錯誤'
+    except:
+        return '代號輸入錯誤'
+    
+    # identify market close time
+    cTime = datetime.datetime.now()
+    openTime = datetime.datetime(cTime.year, cTime.month, cTime.day, 9, 0)
+    closeTime = datetime.datetime(cTime.year, cTime.month, cTime.day, 14, 30)
+    if openTime < cTime < closeTime:
+        t5 = time.time()
+        rtPrice = float(rtStock['realtime']['latest_trade_price'])
+        prePrice = preStock.price[-1] 
+        t6 = time.time()
+    else:
+        t5 = time.time()
+        rtPrice = preStock.price[-1]
+        prePrice = preStock.price[-2]
+        t6 = time.time()
+
+    diff = round(rtPrice-prePrice, 2)
+    percentage = round((rtPrice-prePrice)/prePrice*100, 2)
+    upDown = "📈+" if diff > 0 else "📉"
+    upDown = "(-)" if float(diff) == 0.0 else upDown
+    reply = f"{keyword} {rtStock['info']['name']}  {rtPrice}\n漲跌幅 {upDown}{diff} ({percentage}%)"
+    return reply, (t2,t3,t4,t5,t6)
 
 
 import os
