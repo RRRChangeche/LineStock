@@ -19,7 +19,7 @@ handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
 # home 
 @app.route("/", methods=['GET'])
-def hello():
+def home():
     return "hello rrrgoodies"
 
 # 監聽所有來自 /callback 的 Post Request
