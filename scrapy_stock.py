@@ -28,7 +28,7 @@ def get_stockValue_from_twseAPI(stockNum):
         return ['代號輸入錯誤']
     else: data = data[0]
 
-    currentValue = float(data["z"]) if data['z'] is not '-' else 0.0
+    currentValue = float(data["z"]) if data['z'] != '-' else 0.0
     preValue = float(data["y"])
     stockName = data["n"]
 
