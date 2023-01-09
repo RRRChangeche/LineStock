@@ -45,7 +45,8 @@ def handle_message(event):
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
         print(event)
         print(event.source)
-        user_id = event.source["userId"]
+        print(event.source.userId)
+        user_id = event.source.userId
         profile = line_bot_api.get_profile(user_id)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
