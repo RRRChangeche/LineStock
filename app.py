@@ -43,10 +43,12 @@ def handle_message(event):
     try:
         # Get user id in webhoob event objects
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
+        import json
+        obj = json.loads(event)
         print(event)
-        print(event.source)
-        print(event.source.userId)
-        user_id = event.source.userId
+        # print(event.source)
+        print(obj["source"]["userId"])
+        user_id = obj["source"]["userId"]
         profile = line_bot_api.get_profile(user_id)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
