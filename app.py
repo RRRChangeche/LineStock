@@ -44,19 +44,15 @@ def handle_message(event):
 
     # compile identifier
     # ti = time.time()
-    pattern = re.compile("[0-9]{4}")
+    # pattern = re.compile("[0-9]{4}")
     # t1 = time.time()
 
     if "心情不好" in event.message.text:
         reply = "心情不好啊? 跟你說: \n \n"
         reply += getSentance.pick_a_sentence()
-    elif pattern.fullmatch(event.message.text):
-        code = event.message.text
-        # info = getSotckInfo(code)
-        info = sp.get_stockValue_from_twseAPI(code)
-        reply = info[0]
     else:
-        return
+        code = event.message.text
+        reply = sp.get_stockValue_from_twseAPI(code)
 
     message = TextSendMessage(text=reply)
     line_bot_api.reply_message(event.reply_token, message)

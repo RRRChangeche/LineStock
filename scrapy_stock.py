@@ -1,4 +1,4 @@
-import requests, re, io, sys
+import requests
 from bs4 import BeautifulSoup
 from lxml import etree
 
@@ -19,13 +19,11 @@ def get_stock_table_from_yahoo(stockNum):
     print(df)
 
 def get_stockValue_from_twseAPI(stockNum):
-    from io import StringIO
-    import pandas as pd
     apiUrl = f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_{stockNum}.tw|otc_{stockNum}.tw"
     response = requests.get(apiUrl)
     data = response.json()["msgArray"]
     if not data:
-        return ['代號輸入錯誤']
+        return "代號輸入錯誤"
     else: data = data[0]
 
     currentValue = float(data["z"]) if data['z'] != '-' else 0.0
@@ -42,7 +40,7 @@ def get_stockValue_from_twseAPI(stockNum):
     percentage = "+"+str(percentage) if percentage >= 0 else "-"+str(percentage)
     reply = f"{stockNum} {stockName:<5}\n{'昨收價':<5} {preValue}\n{'漲跌幅':<5}{diff} ({percentage}%){upDown}\n{'當前價':<5} {currentValue}"
 
-    return [reply]
+    return reply
 
     
 
