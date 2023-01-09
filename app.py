@@ -3,7 +3,7 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+    InvalidSignatureError, LineBotApiError
 )
 from linebot.models import *
 import getSentance, sys, twstock, re, datetime, time
@@ -40,9 +40,16 @@ def callback():
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    profile = line_bot_api.get_profile('<user_id>')
-    print("名稱: " + profile.display_name)
-    print("ID: " + profile.user_id)
+    try:
+        # Get user id in webhoob event objects
+        # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
+        user_id = event.source.userId
+        profile = line_bot_api.get_profile(user_id)
+    except LineBotApiError as e:
+        # error handle
+        print("名稱: " + profile.display_name)
+        print("ID: " + profile.user_id)
+
     print("Recieve from client: " + event.message.text)
 
     # compile identifier
