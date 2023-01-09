@@ -45,10 +45,11 @@ def handle_message(event):
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
         user_id = event.source.userId
         profile = line_bot_api.get_profile(user_id)
-    except LineBotApiError as e:
-        # error handle
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
+    except LineBotApiError as e:
+        # error handle
+        print("user id not found!")
 
     print("Recieve from client: " + event.message.text)
 
