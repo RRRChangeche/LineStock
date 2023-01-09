@@ -50,7 +50,7 @@ def handle_message(event):
         profile = line_bot_api.get_profile(user_id)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
-    except LineBotApiError as e:
+    except:
         # error handle
         print("user id not found!")
 
