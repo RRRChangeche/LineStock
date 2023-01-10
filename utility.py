@@ -59,12 +59,15 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         
         # format reply 
         stockName = name
-        currentValue = snapshots.close
-        openValue = snapshots.close
+        current_price = snapshots.close
+        open_price = snapshots.open
         change_price = snapshots.change_price
         change_rate = snapshots.change_rate
+        sign = "+" if change_price >= 0 else "-"
+        change_price = sign + str(change_price)
+        change_rate = sign + str(change_rate)
         upDown = "📈" if change_price > 0 else "📉"
-        reply = f"{stockNum} {stockName:<5}\n{'開盤價':<5} {openValue}\n{'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n{'當前價':<5} {currentValue}"
+        reply = f"{stockNum} {stockName:<5}\n{'開盤價':<5} {open_price}\n{'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n{'當前價':<5} {current_price}"
         return reply
         
     except Exception as e:
