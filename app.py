@@ -50,32 +50,21 @@ def callback():
 # 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    reply = ""
+    # Get user id in webhoob event objects
+    # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
     try:
-        # Get user id in webhoob event objects
-        # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
-        import json
-        print(type(event))
-        print(event)
-        
         json_dict = event.as_json_dict()
-        print("dict: ", json_dict)
-        print(json_dict["source"]["userId"])
-
-        json_string = event.as_json_string()
-        print("string: ", json_string)
-
-        obj = json.loads(json_string)
-        print(obj.source.userId)
-        profile = line_bot_api.get_profile(event.source.user)
+        userId = json_dict["source"]["userId"]
+        profile = line_bot_api.get_profile(userId)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
+        reply = profile.display_name + '您好\n\n'
     except Exception as e:
         # error handle
         print("user id not found!")
         handle_error(e)
         
-
-
     # compile identifier
     # ti = time.time()
     # pattern = re.compile("[0-9]{4}")
