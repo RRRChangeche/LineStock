@@ -55,8 +55,14 @@ def handle_message(event):
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
         import json
         print(type(event))
-        obj = json.loads(event.__str__)
         print(event)
+        json_dict = event.as_json_dict()
+        print(json_dict)
+        print(json_dict.source.userId)
+        json_string = event.as_json_string()
+        print(json_string)
+        print(json_string.source.userId)
+        obj = json.loads(event.__str__())
         print(obj.source.userId)
         # print(obj["source"]["userId"])
         # user_id = obj["source"]["userId"]
