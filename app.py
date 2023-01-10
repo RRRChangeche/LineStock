@@ -59,7 +59,7 @@ def handle_message(event):
         profile = line_bot_api.get_profile(userId)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
-        reply = profile.display_name + '您好\n\n'
+        reply = profile.display_name + '您好~\n\n'
     except Exception as e:
         # error handle
         print("user id not found!")
@@ -78,7 +78,7 @@ def handle_message(event):
         elif is_valid_stockNumber(event.message.text):
             # get stock value
             code = event.message.text
-            reply = get_stockValue_from_sinopacAPI(sjapi, code)
+            reply += get_stockValue_from_sinopacAPI(sjapi, code)
 
         # reply
         message = TextSendMessage(text=reply)

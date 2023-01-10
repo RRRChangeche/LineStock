@@ -74,14 +74,14 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         current_price = snapshots.close
         change_price = snapshots.change_price
         change_rate = snapshots.change_rate
-        prev_price = current_price + change_price
+        prev_price = current_price - change_price
         upDown = "📈" if change_price > 0 else "📉"
         sign = "+" if change_price >= 0 else "-"
         change_price = sign + str(change_price)
         change_rate = sign + str(change_rate)
-        reply = f"{stockNum} {stockName:<5}\n \
-        {'昨收價':<5} {prev_price}\n \
-        {'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n \
+        reply = f"{stockNum} {stockName:<5}\n\
+        {'昨收價':<5} {prev_price}\n\
+        {'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n\
         {'當前價':<5} {current_price}"
         return reply
         
