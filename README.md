@@ -18,4 +18,5 @@ A real-time stock price checking linebot for Taiwan market
 '''
 
 # Demo
+![Demo](assets/Demo.gif)
 
