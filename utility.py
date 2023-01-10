@@ -79,10 +79,7 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         sign = "+" if change_price >= 0 else "-"
         change_price = sign + str(change_price)
         change_rate = sign + str(change_rate)
-        reply = f"{stockNum} {stockName:<5}\n\
-        {'昨收價':<5} {prev_price}\n\
-        {'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n\
-        {'當前價':<5} {current_price}"
+        reply = f"{stockNum} {stockName:<5}\n{'昨收價':<5} {prev_price}\n{'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n{'當前價':<5} {current_price}"
         return reply
         
     except Exception as e:
