@@ -56,16 +56,16 @@ def handle_message(event):
         import json
         print(type(event))
         print(event)
+        
         json_dict = event.as_json_dict()
-        print(json_dict)
-        print(json_dict.source.userId)
+        print("dict: ", json_dict)
+        print(json_dict["source"]["userId"])
+
         json_string = event.as_json_string()
-        print(json_string)
-        print(json_string.source.userId)
-        obj = json.loads(event.__str__())
+        print("string: ", json_string)
+
+        obj = json.loads(json_string)
         print(obj.source.userId)
-        # print(obj["source"]["userId"])
-        # user_id = obj["source"]["userId"]
         profile = line_bot_api.get_profile(event.source.user)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
