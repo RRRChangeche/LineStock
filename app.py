@@ -63,28 +63,36 @@ def handle_message(event):
         profile = line_bot_api.get_profile(user_id)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
-    except:
+    except Exception as e:
         # error handle
         print("user id not found!")
+        handle_error(e)
+        
 
-    print("Recieve from client: " + event.message.text)
 
     # compile identifier
     # ti = time.time()
     # pattern = re.compile("[0-9]{4}")
     # t1 = time.time()
 
-    if "心情不好" in event.message.text:
-        reply = "心情不好啊? 跟你說: \n \n"
-        reply += getSentance.pick_a_sentence()
-    elif is_valid_stockNumber(event.message.text):
-        # get stock value
-        code = event.message.text
-        reply = get_stockValue_from_sinopacAPI(sjapi, code)
+    try:
+        print("Recieve from client: " + event.message.text)
+        if "心情不好" in event.message.text:
+            reply = "心情不好啊? 跟你說: \n \n"
+            reply += getSentance.pick_a_sentence()
+        elif is_valid_stockNumber(event.message.text):
+            # get stock value
+            code = event.message.text
+            reply = get_stockValue_from_sinopacAPI(sjapi, code)
 
         # reply
         message = TextSendMessage(text=reply)
         line_bot_api.reply_message(event.reply_token, message)
+
+    except Exception as e:
+        print("Failed in reply: " + str(e))
+        handle_error(e)
+
 
     # (t2,t3,t4,t5,t6) = info[1] 
     # debugMsg = "Time consumption:\n"

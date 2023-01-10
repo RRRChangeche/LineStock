@@ -1,10 +1,22 @@
 import requests
 from lxml import etree
 from twstock import realtime
+import traceback, sys
 
     
 def is_valid_stockNumber(msg):
     return True
+
+def handle_error(error):
+    error_class = type(error)
+    detail = error.args[0] # details
+    cl, exc, tb = sys.exc_info() # get Call Stack
+    lastCallStack = traceback.extract_tb(tb)[-1] # get latest Call Stack
+    fileName = lastCallStack[0]
+    lineNum = lastCallStack[1]
+    funcName = lastCallStack[2]
+    errMsg = f"File {fileName}, line {lineNum}, in {funcName}: [{error_class}] {detail}" # .format(fileName, lineNum, funcName, error_class, detail)
+    print(errMsg)
 
 def get_stockValue_from_anue(stockNum):
     url = f"https://invest.cnyes.com/twstock/tws/{stockNum}"
@@ -50,7 +62,7 @@ def get_stockValue_from_twseAPI(stockNum):
 def get_stockValue_from_sinopacAPI(apiObj, stockNum):
     try:
         # get stock name 
-        stockName = realtime.get('2330')['info']['name']
+        stockName = realtime.get(stockNum)['info']['name']
         stockName = stockName if stockName else ""
 
         # get current stock value from sinopac api
@@ -72,8 +84,8 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         
     except Exception as e:
         print(f"Failed in sinopac api: {str(e)}")
-    
-    return ""
+        handle_error(e)
+
 
 # get_stockValue_from_anue(3034)
 # get_stock_Value_from_yahoo(1101)
