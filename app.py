@@ -6,16 +6,26 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 from linebot.models import *
+from utility import *
 import getSentance, sys, twstock, re, datetime, time
-import scrapy_stock as sp 
 import os
 
 app = Flask(__name__)
 
+# Line API
 # Channel Access Token
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 # Channel Secret
 handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
+
+# Sinopac API
+import shioaji as sj
+sjapi = sj.Shioaji()
+sjapi.login(
+    api_key = os.environ['SINOPAC_API_KEY'],
+    secret_key = os.environ['SINOPAC__SECRET_KEY'], 
+    contracts_cb=lambda security_type: print(f"{repr(security_type)} fetch done.")
+)
 
 # home 
 @app.route("/", methods=['GET'])
@@ -44,6 +54,7 @@ def handle_message(event):
         # Get user id in webhoob event objects
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
         import json
+        print(type(event))
         obj = json.loads(event)
         print(event)
         # print(event.source)
@@ -66,12 +77,14 @@ def handle_message(event):
     if "心情不好" in event.message.text:
         reply = "心情不好啊? 跟你說: \n \n"
         reply += getSentance.pick_a_sentence()
-    else:
+    elif is_valid_stockNumber(event.message.text):
+        # get stock value
         code = event.message.text
-        reply = sp.get_stockValue_from_twseAPI(code)
+        reply = get_stockValue_from_twseAPI(code)
 
-    message = TextSendMessage(text=reply)
-    line_bot_api.reply_message(event.reply_token, message)
+        # reply
+        message = TextSendMessage(text=reply)
+        line_bot_api.reply_message(event.reply_token, message)
 
     # (t2,t3,t4,t5,t6) = info[1] 
     # debugMsg = "Time consumption:\n"
@@ -82,41 +95,7 @@ def handle_message(event):
     # debugMsg += f"Total :\t {round(t6-ti, 3)}\n"
     # print(debugMsg)
     # sys.stdout.flush()
-
-def getSotckInfo(keyword):
-    try:
-        t2 = time.time()
-        rtStock = twstock.realtime.get(keyword)
-        t3 = time.time()
-        preStock = twstock.Stock(keyword)
-        t4 = time.time()
-        if not rtStock['success']:
-            return '代號輸入錯誤'
-    except:
-        return '代號輸入錯誤'
     
-    # identify market close time
-    cTime = datetime.datetime.now()
-    openTime = datetime.datetime(cTime.year, cTime.month, cTime.day, 9, 0)
-    closeTime = datetime.datetime(cTime.year, cTime.month, cTime.day, 14, 30)
-    if openTime < cTime < closeTime:
-        t5 = time.time()
-        rtPrice = float(rtStock['realtime']['latest_trade_price'])
-        prePrice = preStock.price[-1] 
-        t6 = time.time()
-    else:
-        t5 = time.time()
-        rtPrice = preStock.price[-1]
-        prePrice = preStock.price[-2]
-        t6 = time.time()
-
-    diff = round(rtPrice-prePrice, 2)
-    percentage = round((rtPrice-prePrice)/prePrice*100, 2)
-    upDown = "📈+" if diff > 0 else "📉"
-    upDown = "(-)" if float(diff) == 0.0 else upDown
-    reply = f"{keyword} {rtStock['info']['name']}  {rtPrice}\n漲跌幅 {upDown}{diff} ({percentage}%)"
-    return reply, (t2,t3,t4,t5,t6)
-
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
