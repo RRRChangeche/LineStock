@@ -55,12 +55,12 @@ def handle_message(event):
         # https://developers.line.biz/en/reference/messaging-api/#webhook-event-objects
         import json
         print(type(event))
-        obj = json.loads(event)
+        # obj = json.loads(event.__str__)
         print(event)
         # print(event.source)
-        print(obj["source"]["userId"])
-        user_id = obj["source"]["userId"]
-        profile = line_bot_api.get_profile(user_id)
+        # print(obj["source"]["userId"])
+        # user_id = obj["source"]["userId"]
+        profile = line_bot_api.get_profile(event.source.user)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
     except Exception as e:
