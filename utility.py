@@ -43,7 +43,7 @@ def get_stockValue_from_twseAPI(stockNum):
     upDown = "(-)" if float(diff) == 0.0 else upDown
     diff = "+"+str(diff) if diff >= 0 else "-"+str(diff)
     percentage = "+"+str(percentage) if percentage >= 0 else "-"+str(percentage)
-    reply = f"{stockNum} {stockName:<5}\n{'昨收價':<5} {preValue}\n{'漲跌幅':<5}{diff} ({percentage}%){upDown}\n{'當前價':<5} {currentValue}"
+    reply = f"{stockNum} {stockName:<5}\n{'開盤價':<5} {preValue}\n{'漲跌幅':<5}{diff} ({percentage}%){upDown}\n{'當前價':<5} {currentValue}"
 
     return reply
 
