@@ -80,7 +80,7 @@ def handle_message(event):
     elif is_valid_stockNumber(event.message.text):
         # get stock value
         code = event.message.text
-        reply = get_stockValue_from_sinopacAPI(code)
+        reply = get_stockValue_from_sinopacAPI(sjapi, code)
 
         # reply
         message = TextSendMessage(text=reply)
