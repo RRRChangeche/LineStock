@@ -61,22 +61,20 @@ def get_stockValue_from_twseAPI(stockNum):
 
 def get_stockValue_from_sinopacAPI(apiObj, stockNum):
     try:
-        # get stock name 
-        stockName = realtime.get(stockNum)['info']['name']
-        stockName = stockName if stockName else ""
-
-        # get current stock value from sinopac api
+        # get contracts and snapshots from sinopac api
         contracts = [apiObj.Contracts.Stocks[stockNum]]
         if not contracts: return ""
         snapshots = apiObj.snapshots(contracts)[0]
         
+        # get current stock value and name
         # format reply 
+        stockName = contracts[0].name
         current_price = snapshots.close
         change_price = snapshots.change_price
         change_rate = snapshots.change_rate
         prev_price = current_price - change_price
         upDown = "📈" if change_price > 0 else "📉"
-        sign = "+" if change_price >= 0 else "-"
+        sign = "+" if change_price >= 0 else ""
         change_price = sign + str(change_price)
         change_rate = sign + str(change_rate)
         reply = f"{stockNum} {stockName:<5}\n{'昨收價':<5} {prev_price}\n{'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n{'當前價':<5} {current_price}"
