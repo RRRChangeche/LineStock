@@ -69,9 +69,9 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         # get current stock value and name
         # format reply 
         stockName = contracts[0].name
-        current_price = snapshots.close
-        change_price = snapshots.change_price
-        change_rate = snapshots.change_rate
+        current_price = round(snapshots.close, 2)
+        change_price = round(snapshots.change_price, 2)
+        change_rate = round(snapshots.change_rate, 2)
         prev_price = current_price - change_price
         upDown = "📈" if change_price > 0 else "📉"
         sign = "+" if change_price >= 0 else ""
