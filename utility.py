@@ -2,7 +2,40 @@ import requests
 from lxml import etree
 from twstock import realtime
 import traceback, sys
+import os, configparser
 
+
+def get_api_key():
+    try:
+        # Check key in os.environ
+        CHANNEL_ACCESS_TOKEN = os.environ.get('CHANNEL_ACCESS_TOKEN')
+        CHANNEL_SECRET = os.environ.get('CHANNEL_SECRET')
+        SINOPAC_API_KEY = os.environ.get('SINOPAC_API_KEY')
+        SINOPAC__SECRET_KEY = os.environ.get('SINOPAC__SECRET_KEY')
+
+        # Check key in config.ini (test at localhost)
+        CWD = os.getcwd()
+        CONFIG_FILE = os.path.join(CWD, 'config.ini')
+        assert os.path.exists(CONFIG_FILE), "Can't find config.ini"
+        config = configparser.ConfigParser()
+        config_read_success = config.read(CONFIG_FILE)
+        if  CHANNEL_ACCESS_TOKEN == None and CHANNEL_SECRET == None and \
+            SINOPAC_API_KEY == None and SINOPAC__SECRET_KEY == None and \
+            config_read_success != []:
+            CHANNEL_ACCESS_TOKEN = config['linebot']['CHANNEL_ACCESS_TOKEN']
+            CHANNEL_SECRET = config['linebot']['CHANNEL_SECRET']
+            SINOPAC_API_KEY = config['shioaji']['SINOPAC_API_KEY']
+            SINOPAC__SECRET_KEY = config['shioaji']['SINOPAC__SECRET_KEY']
+            print("Got API KEY in config.ini!")
+
+        assert CHANNEL_ACCESS_TOKEN is not None and CHANNEL_SECRET is not None and \
+            SINOPAC_API_KEY is not None and SINOPAC__SECRET_KEY is not None, \
+            "WARNNING: Uable to get the API KEY!!"
+        
+    except Exception as e:
+        handle_error(e)
+
+    return (CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY)
     
 def is_valid_stockNumber(msg):
     return True
