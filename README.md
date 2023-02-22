@@ -5,7 +5,8 @@ A real-time stock price checking linebot for Taiwan market
 # Environment
 - Python
 - Heroku
-- line-bot-sdk for python
+- [line-bot-sdk for python](https://github.com/line/line-bot-sdk-python)
+- [shioaji Python API](https://sinotrade.github.io/)
 
 # Usage
 1. Type the stock code which you want to check in chatroom.
