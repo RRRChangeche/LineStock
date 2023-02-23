@@ -3,7 +3,40 @@ from lxml import etree
 from twstock import realtime
 import pandas as pd
 import traceback, sys
+import os, configparser
 
+
+def get_api_key():
+    try:
+        # Check key in os.environ
+        CHANNEL_ACCESS_TOKEN = os.environ.get('CHANNEL_ACCESS_TOKEN')
+        CHANNEL_SECRET = os.environ.get('CHANNEL_SECRET')
+        SINOPAC_API_KEY = os.environ.get('SINOPAC_API_KEY')
+        SINOPAC__SECRET_KEY = os.environ.get('SINOPAC__SECRET_KEY')
+
+        # Check key in config.ini (test at localhost)
+        CWD = os.getcwd()
+        CONFIG_FILE = os.path.join(CWD, 'config.ini')
+        assert os.path.exists(CONFIG_FILE), "Can't find config.ini"
+        config = configparser.ConfigParser()
+        config_read_success = config.read(CONFIG_FILE)
+        if  CHANNEL_ACCESS_TOKEN == None and CHANNEL_SECRET == None and \
+            SINOPAC_API_KEY == None and SINOPAC__SECRET_KEY == None and \
+            config_read_success != []:
+            CHANNEL_ACCESS_TOKEN = config['linebot']['CHANNEL_ACCESS_TOKEN']
+            CHANNEL_SECRET = config['linebot']['CHANNEL_SECRET']
+            SINOPAC_API_KEY = config['shioaji']['SINOPAC_API_KEY']
+            SINOPAC__SECRET_KEY = config['shioaji']['SINOPAC__SECRET_KEY']
+            print("Got API KEY in config.ini!")
+
+        assert CHANNEL_ACCESS_TOKEN is not None and CHANNEL_SECRET is not None and \
+            SINOPAC_API_KEY is not None and SINOPAC__SECRET_KEY is not None, \
+            "WARNNING: Uable to get the API KEY!!"
+        
+    except Exception as e:
+        handle_error(e)
+
+    return (CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY)
     
 def is_valid_stockNumber(msg):
     return True
@@ -71,22 +104,20 @@ def get_stockValue_from_twseAPI(stockNum):
 
 def get_stockValue_from_sinopacAPI(apiObj, stockNum):
     try:
-        # get stock name 
-        stockName = realtime.get(stockNum)['info']['name']
-        stockName = stockName if stockName else ""
-
-        # get current stock value from sinopac api
+        # get contracts and snapshots from sinopac api
         contracts = [apiObj.Contracts.Stocks[stockNum]]
         if not contracts: return ""
         snapshots = apiObj.snapshots(contracts)[0]
         
+        # get current stock value and name
         # format reply 
-        current_price = snapshots.close
-        change_price = snapshots.change_price
-        change_rate = snapshots.change_rate
-        prev_price = current_price - change_price
+        stockName = contracts[0].name
+        current_price = round(snapshots.close, 2)
+        change_price = round(snapshots.change_price, 2)
+        change_rate = round(snapshots.change_rate, 2)
+        prev_price = round(current_price - change_price, 2)
         upDown = "📈" if change_price > 0 else "📉"
-        sign = "+" if change_price >= 0 else "-"
+        sign = "+" if change_price >= 0 else ""
         change_price = sign + str(change_price)
         change_rate = sign + str(change_rate)
         reply = f"{stockNum} {stockName:<5}\n{'昨收價':<5} {prev_price}\n{'漲跌幅':<5}{change_price} ({change_rate}%){upDown}\n{'當前價':<5} {current_price}"

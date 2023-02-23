@@ -12,20 +12,24 @@ import os
 
 app = Flask(__name__)
 
+# Set API key
+CHANNEL_ACCESS_TOKEN = ""
+CHANNEL_SECRET = ""
+SINOPAC_API_KEY = ""
+SINOPAC__SECRET_KEY = ""
+CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY = get_api_key()
 # Line API
-# Channel Access Token
-line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
-# Channel Secret
-handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
-
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN) # Channel Access Token
+handler = WebhookHandler(CHANNEL_SECRET)    # Channel Secret
 # Sinopac API
 import shioaji as sj
 sjapi = sj.Shioaji()
 sjapi.login(
-    api_key = os.environ['SINOPAC_API_KEY'],
-    secret_key = os.environ['SINOPAC__SECRET_KEY'], 
+    api_key = SINOPAC_API_KEY,
+    secret_key = SINOPAC__SECRET_KEY, 
     contracts_cb=lambda security_type: print(f"{repr(security_type)} fetch done.")
 )
+
 
 # home 
 @app.route("/", methods=['GET'])
