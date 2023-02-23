@@ -4,6 +4,7 @@ from twstock import realtime
 import pandas as pd
 import traceback, sys
 import os, configparser
+from pymongo import MongoClient
 
 
 def get_api_key():
@@ -15,29 +16,54 @@ def get_api_key():
         SINOPAC__SECRET_KEY = os.environ.get('SINOPAC__SECRET_KEY')
 
         # Check key in config.ini (test at localhost)
-        CWD = os.getcwd()
-        CONFIG_FILE = os.path.join(CWD, 'config.ini')
-        assert os.path.exists(CONFIG_FILE), "Can't find config.ini"
+        CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
+        assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
         config = configparser.ConfigParser()
         config_read_success = config.read(CONFIG_FILE)
         if  CHANNEL_ACCESS_TOKEN == None and CHANNEL_SECRET == None and \
             SINOPAC_API_KEY == None and SINOPAC__SECRET_KEY == None and \
-            config_read_success != []:
+            config_read_success != []:  # if can't get KEY in system variables, get from config.ini
             CHANNEL_ACCESS_TOKEN = config['linebot']['CHANNEL_ACCESS_TOKEN']
             CHANNEL_SECRET = config['linebot']['CHANNEL_SECRET']
             SINOPAC_API_KEY = config['shioaji']['SINOPAC_API_KEY']
             SINOPAC__SECRET_KEY = config['shioaji']['SINOPAC__SECRET_KEY']
-            print("Got API KEY in config.ini!")
+            print("INFO: Got API KEY in config.ini!")
 
         assert CHANNEL_ACCESS_TOKEN is not None and CHANNEL_SECRET is not None and \
             SINOPAC_API_KEY is not None and SINOPAC__SECRET_KEY is not None, \
             "WARNNING: Uable to get the API KEY!!"
         
     except Exception as e:
+        print(f"ERROR: Failed in get_api_key(): {str(e)}")
         handle_error(e)
 
     return (CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY)
-    
+
+def connect_to_mongodb():
+    # Check key in os.environ
+    MONGODB_PWD = os.environ.get('MONGODB_PWD')
+
+    # Check key in config.ini (test at localhost)
+    CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
+    assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
+    config = configparser.ConfigParser()
+    config_read_success = config.read(CONFIG_FILE)
+    assert config_read_success != [], "WARNNING: Can't find config.ini"
+    if MONGODB_PWD == None and config_read_success != []: 
+        MONGODB_PWD = config["mongodb"]["MONGODB_PWD"]
+
+    try:
+        # get connection url from Atlas UI
+        MONGODB_URI = f"mongodb+srv://RRR:{MONGODB_PWD}@cluster0.v2s4ck3.mongodb.net/?retryWrites=true&w=majority"
+        # Create a new client, connect to the cluster with MongoClient
+        client = MongoClient(MONGODB_URI)
+        print(f"INFO: connected to mongodb cluster!")
+    except Exception as e:
+        print(f"ERROR: Failed in connect_to_mongodb(): {str(e)}")
+        handle_error(e)
+
+    return client
+
 def is_valid_stockNumber(msg):
     return True
 
@@ -106,7 +132,7 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
     try:
         # get contracts and snapshots from sinopac api
         contracts = [apiObj.Contracts.Stocks[stockNum]]
-        if not contracts: return ""
+        if contracts[0] == None: return ""  # if not a valid stock code, return ""
         snapshots = apiObj.snapshots(contracts)[0]
         
         # get current stock value and name
@@ -124,8 +150,10 @@ def get_stockValue_from_sinopacAPI(apiObj, stockNum):
         return reply
         
     except Exception as e:
-        print(f"Failed in sinopac api: {str(e)}")
+        print(f"ERROR: Failed in sinopac api: {str(e)}")
         handle_error(e)
+    
+    return ""
 
 
 # get_stockValue_from_anue(3034)

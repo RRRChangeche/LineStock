@@ -12,24 +12,26 @@ import os
 
 app = Flask(__name__)
 
-# Set API key
-CHANNEL_ACCESS_TOKEN = ""
-CHANNEL_SECRET = ""
-SINOPAC_API_KEY = ""
-SINOPAC__SECRET_KEY = ""
-CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY = get_api_key()
-# Line API
-line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN) # Channel Access Token
-handler = WebhookHandler(CHANNEL_SECRET)    # Channel Secret
-# Sinopac API
-import shioaji as sj
-sjapi = sj.Shioaji()
-sjapi.login(
-    api_key = SINOPAC_API_KEY,
-    secret_key = SINOPAC__SECRET_KEY, 
-    contracts_cb=lambda security_type: print(f"{repr(security_type)} fetch done.")
-)
+try:
+    # Set API key
+    CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, SINOPAC_API_KEY, SINOPAC__SECRET_KEY = get_api_key()
+    # Line API
+    line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN) # Channel Access Token
+    handler = WebhookHandler(CHANNEL_SECRET)    # Channel Secret
+    # Sinopac API
+    import shioaji as sj
+    sjapi = sj.Shioaji()
+    sjapi.login(
+        api_key = SINOPAC_API_KEY,
+        secret_key = SINOPAC__SECRET_KEY, 
+        contracts_cb=lambda security_type: print(f"{repr(security_type)} fetch done.")
+    )
 
+    # Set MongoDB connection
+    db = connect_to_mongodb()
+
+except Exception as e:
+    handle_error(e)
 
 # home 
 @app.route("/", methods=['GET'])
@@ -63,7 +65,6 @@ def handle_message(event):
         profile = line_bot_api.get_profile(userId)
         print("名稱: " + profile.display_name)
         print("ID: " + profile.user_id)
-        reply = profile.display_name + '您好~\n\n'
     except Exception as e:
         # error handle
         print("user id not found!")
@@ -82,14 +83,17 @@ def handle_message(event):
         elif is_valid_stockNumber(event.message.text):
             # get stock value
             code = event.message.text
-            reply += get_stockValue_from_sinopacAPI(sjapi, code)
+            stock_info = get_stockValue_from_sinopacAPI(sjapi, code)
+            if stock_info != "":
+                reply = profile.display_name + '您好~\n\n' + stock_info
 
         # reply
+        if reply == "": return
         message = TextSendMessage(text=reply)
         line_bot_api.reply_message(event.reply_token, message)
 
     except Exception as e:
-        print("Failed in reply: " + str(e))
+        print("ERROR: Failed in reply: " + str(e))
         handle_error(e)
 
 
