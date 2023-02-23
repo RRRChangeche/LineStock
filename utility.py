@@ -1,11 +1,21 @@
 import requests
 from lxml import etree
 from twstock import realtime
+import pandas as pd
 import traceback, sys
 
     
 def is_valid_stockNumber(msg):
     return True
+
+def get_all_stock_codes():
+    # get 
+    res = requests.get("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2")
+    df = pd.read_html(res.text)[0]
+    # remove useless cols and rows 
+    df = df.drop([0, 1], axis=0)
+    df = df.drop([1,2,5,6], axis=1)
+
 
 def handle_error(error):
     error_class = type(error)
