@@ -145,10 +145,10 @@ if __name__ == '__main__':
     # Execute 
     if len(sys.argv) > 1: 
         if sys.argv[1] == '-n':
-            print("INFO: Insert new stock codes!")
+            print("INFO: Insert new stock codes! It may take for a while.")
             update_new_stockCodes(tw_market_collection)
         elif sys.argv[1] == '-a':
-            print("INFO: Update all stock codes!")
+            print("INFO: Update all stock codes! It may take for a while.")
             update_all_stockInfo(tw_market_collection)
         elif sys.argv[1] == '-h':
             print("INFO: Please try: python getStockCodes.py [-n|-a|-h]")
