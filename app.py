@@ -28,7 +28,7 @@ try:
     )
 
     # Set MongoDB connection
-    db = connect_to_mongodb()
+    client = connect_to_mongodb()
 
 except Exception as e:
     handle_error(e)
@@ -80,7 +80,7 @@ def handle_message(event):
         if "心情不好" in event.message.text:
             reply = "心情不好啊? 跟你說: \n \n"
             reply += getSentance.pick_a_sentence()
-        elif is_valid_stockNumber(event.message.text):
+        else:
             # get stock value
             code = event.message.text
             stock_info = get_stockValue_from_sinopacAPI(sjapi, code)

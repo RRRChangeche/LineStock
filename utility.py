@@ -41,6 +41,7 @@ def get_api_key():
 
 def connect_to_mongodb():
     # Check key in os.environ
+    MONGODB_URL = os.environ.get('MONGODB_URL')
     MONGODB_PWD = os.environ.get('MONGODB_PWD')
 
     # Check key in config.ini (test at localhost)
@@ -49,32 +50,21 @@ def connect_to_mongodb():
     config = configparser.ConfigParser()
     config_read_success = config.read(CONFIG_FILE)
     assert config_read_success != [], "WARNNING: Can't find config.ini"
-    if MONGODB_PWD == None and config_read_success != []: 
+    if (MONGODB_URL == None or MONGODB_PWD == None) and config_read_success != []: 
+        MONGODB_URL = config["mongodb"]["MONGODB_URL"]
         MONGODB_PWD = config["mongodb"]["MONGODB_PWD"]
 
     try:
         # get connection url from Atlas UI
-        MONGODB_URI = f"mongodb+srv://RRR:{MONGODB_PWD}@cluster0.v2s4ck3.mongodb.net/?retryWrites=true&w=majority"
+        MONGODB_URL = MONGODB_URL.format(PWD = MONGODB_PWD)
         # Create a new client, connect to the cluster with MongoClient
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(MONGODB_URL)
         print(f"INFO: connected to mongodb cluster!")
     except Exception as e:
         print(f"ERROR: Failed in connect_to_mongodb(): {str(e)}")
         handle_error(e)
 
     return client
-
-def is_valid_stockNumber(msg):
-    return True
-
-def get_all_stock_codes():
-    # get 
-    res = requests.get("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2")
-    df = pd.read_html(res.text)[0]
-    # remove useless cols and rows 
-    df = df.drop([0, 1], axis=0)
-    df = df.drop([1,2,5,6], axis=1)
-
 
 def handle_error(error):
     error_class = type(error)
