@@ -60,11 +60,21 @@ def connect_to_mongodb():
         # Create a new client, connect to the cluster with MongoClient
         client = MongoClient(MONGODB_URL)
         print(f"INFO: connected to mongodb cluster!")
+        return client
     except Exception as e:
         print(f"ERROR: Failed in connect_to_mongodb(): {str(e)}")
         handle_error(e)
 
-    return client
+def get_stockValue_by_name(db, name):
+    '''
+        return stock code if stock name exists in db.
+    '''
+    query = { "name" : name }
+    result = db.stock.tw_market.find_one(query)
+    if result == None: 
+        return None
+    else:
+        return result["code"]
 
 def handle_error(error):
     error_class = type(error)

@@ -80,9 +80,10 @@ def handle_message(event):
         if "心情不好" in event.message.text:
             reply = "心情不好啊? 跟你說: \n \n"
             reply += getSentance.pick_a_sentence()
-        else:
-            # get stock value
+        else:   # get stock value
             code = event.message.text
+            if event.message.text[0] == '!':    # get stock value by stock name
+                code = get_stockValue_by_name(client, event.message.text[1:])
             stock_info = get_stockValue_from_sinopacAPI(sjapi, code)
             if stock_info != "":
                 reply = profile.display_name + '您好~\n\n' + stock_info
