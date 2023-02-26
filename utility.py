@@ -16,22 +16,26 @@ def get_api_key():
         SINOPAC__SECRET_KEY = os.environ.get('SINOPAC__SECRET_KEY')
 
         # Check key in config.ini (test at localhost)
-        CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
-        assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
-        config = configparser.ConfigParser()
-        config_read_success = config.read(CONFIG_FILE)
-        if  CHANNEL_ACCESS_TOKEN == None and CHANNEL_SECRET == None and \
-            SINOPAC_API_KEY == None and SINOPAC__SECRET_KEY == None and \
-            config_read_success != []:  # if can't get KEY in system variables, get from config.ini
-            CHANNEL_ACCESS_TOKEN = config['linebot']['CHANNEL_ACCESS_TOKEN']
-            CHANNEL_SECRET = config['linebot']['CHANNEL_SECRET']
-            SINOPAC_API_KEY = config['shioaji']['SINOPAC_API_KEY']
-            SINOPAC__SECRET_KEY = config['shioaji']['SINOPAC__SECRET_KEY']
-            print("INFO: Got API KEY in config.ini!")
+        if  CHANNEL_ACCESS_TOKEN == None or CHANNEL_SECRET == None or \
+            SINOPAC_API_KEY == None or SINOPAC__SECRET_KEY == None:
+            CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
+            assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
+            config = configparser.ConfigParser()
+            config_read_success = config.read(CONFIG_FILE)
+            assert config_read_success != [], "WARNNING: Can't find config.ini"
+
+            if  config_read_success != []:  # if can't get KEY in system variables, get from config.ini
+                CHANNEL_ACCESS_TOKEN = config['linebot']['CHANNEL_ACCESS_TOKEN']
+                CHANNEL_SECRET = config['linebot']['CHANNEL_SECRET']
+                SINOPAC_API_KEY = config['shioaji']['SINOPAC_API_KEY']
+                SINOPAC__SECRET_KEY = config['shioaji']['SINOPAC__SECRET_KEY']
+                print("INFO: Got API KEY in config.ini!")
+        else: 
+            print("INFO: Got API KEY from os environment variable!")
 
         assert CHANNEL_ACCESS_TOKEN is not None and CHANNEL_SECRET is not None and \
             SINOPAC_API_KEY is not None and SINOPAC__SECRET_KEY is not None, \
-            "WARNNING: Uable to get the API KEY!!"
+            "WARNNING: Uable to get the API KEY!"
         
     except Exception as e:
         print(f"ERROR: Failed in get_api_key(): {str(e)}")
@@ -45,14 +49,23 @@ def connect_to_mongodb():
     MONGODB_PWD = os.environ.get('MONGODB_PWD')
 
     # Check key in config.ini (test at localhost)
-    CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
-    assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
-    config = configparser.ConfigParser()
-    config_read_success = config.read(CONFIG_FILE)
-    assert config_read_success != [], "WARNNING: Can't find config.ini"
-    if (MONGODB_URL == None or MONGODB_PWD == None) and config_read_success != []: 
-        MONGODB_URL = config["mongodb"]["MONGODB_URL"]
-        MONGODB_PWD = config["mongodb"]["MONGODB_PWD"]
+    if MONGODB_URL == None or MONGODB_PWD == None:
+        CONFIG_FILE = os.path.join(os.getcwd(), 'config.ini')
+        assert os.path.exists(CONFIG_FILE), "WARNNING: Can't find config.ini"
+        config = configparser.ConfigParser()
+        config_read_success = config.read(CONFIG_FILE)
+        assert config_read_success != [], "WARNNING: Can't find config.ini"
+        
+        if config_read_success != []: 
+            MONGODB_URL = config["mongodb"]["MONGODB_URL"]
+            MONGODB_PWD = config["mongodb"]["MONGODB_PWD"]
+            print("INFO: Got MONGODB_URL & MONGODB_PWD in config.ini!")
+    else: 
+        print("INFO: Got MONGODB_URL & MONGODB_PWD from os environment variable!")
+
+
+    assert MONGODB_URL is not None and MONGODB_PWD is not None, \
+            "WARNNING: Uable to get MONGODB_URL & MONGODB_PWD!"
 
     try:
         # get connection url from Atlas UI
