@@ -1,5 +1,5 @@
 *.pyc
 *.txt
 *.log
-.vscode
+.vscode/
 config.ini
